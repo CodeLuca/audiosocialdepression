@@ -7,13 +7,13 @@ const path = require('path');
 const webpack = require('webpack');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const webpackHotMiddleware = require('webpack-hot-middleware');
+const fileUpload = require('express-fileupload');
 
 const config = require('../config/config');
 const webpackConfig = require('../webpack.config');
 
 const isDev = process.env.NODE_ENV !== 'production';
-const port  = process.env.PORT || 8080;
-
+const port  = process.env.PORT || 3000;
 
 // Configuration
 // ================================================================================================
@@ -25,15 +25,18 @@ mongoose.connect(config.db, {
 mongoose.Promise = global.Promise;
 
 const app = express();
+const server = require('http').Server(app);
+const io = require('socket.io')(server);
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use('/audio_files', express.static('audio_files'))
 
 // API routes
-require('./routes')(app);
+require('./routes')(app, io);
 
 if (isDev) {
   const compiler = webpack(webpackConfig);
-
   app.use(historyApiFallback({
     verbose: false
   }));
@@ -50,7 +53,6 @@ if (isDev) {
       modules: false
     }
   }));
-
   app.use(webpackHotMiddleware(compiler));
   app.use(express.static(path.resolve(__dirname, '../dist')));
 } else {
@@ -61,7 +63,7 @@ if (isDev) {
   });
 }
 
-app.listen(port, '0.0.0.0', (err) => {
+server.listen(port, '0.0.0.0', (err) => {
   if (err) {
     console.log(err);
   }

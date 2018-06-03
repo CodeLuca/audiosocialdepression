@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import 'whatwg-fetch';
+import { inject, observer } from "mobx-react"
 
+const socket = io.connect('http://localhost:3000');
+
+@inject('store') @observer
 class Home extends Component {
   constructor(props) {
     super(props);
@@ -25,6 +29,11 @@ class Home extends Component {
           counters: json
         });
       });
+
+    socket.on('news', function (data) {
+      console.log(data);
+      socket.emit('my other event', { my: 'data' });
+    });
   }
 
   newCounter() {
@@ -86,7 +95,7 @@ class Home extends Component {
   render() {
     return (
       <div>
-        <p>Counters:</p>
+        <p>Counters: {this.props.store.todos}</p>
 
         <ul>
           { this.state.counters.map((counter, i) => (

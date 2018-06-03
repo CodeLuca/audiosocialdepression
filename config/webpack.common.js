@@ -34,7 +34,8 @@ module.exports = {
       {
         test: /\.jsx?$/,
         include: helpers.root('client'),
-        loader: 'babel-loader'
+        loader: 'babel-loader',
+        query: { presets: ['es2015', 'react'], plugins: ["transform-decorators-legacy", "transform-class-properties"] }
       },
 
       // SCSS files
